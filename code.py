@@ -14,9 +14,6 @@ from hmmlearn import hmm
 
 from collections import Counter
 
-# import nltk
-# from nltk.cluster.kmeans import KMeansClusterer
-
 
 def plot_segmentation(signal, segments, title, t=20):
     s = signal[:16000*t]
@@ -192,17 +189,15 @@ def main():
     
     # K-means for clustering
     kmeans = KMeans(n_clusters=avg_features.shape[0], init=avg_features).fit(features)
-    # kmeans_predicted_states = kmeans.labels_
-    kmeans_cluster_centers = kmeans.cluster_centers_
     
     # training HMM
     n_components = len(set(new_segments))
     hmm_model = hmm.GaussianHMM(n_components=n_components, covariance_type="full", n_iter=100)
-    hmm_model.means_prior = kmeans_cluster_centers
+    hmm_model.means_prior = kmeans.cluster_centers_
     hmm_model.fit(features)
     
     hmm_predicted_states = hmm_model.predict(features)
-        
+    
     # output music summary with most represented state
     count_states = Counter(hmm_predicted_states)
     most_represented_state = sorted(count_states.keys(), key=lambda key:count_states[key], reverse=True)[0]
